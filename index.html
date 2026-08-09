@@ -5,49 +5,40 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0"
   >
 
   <title>Registo de Tiro</title>
 
   <link rel="manifest" href="manifest.json">
-
-  <link
-    rel="icon"
-    type="image/png"
-    sizes="192x192"
-    href="icon-192.png"
-  >
+  <link rel="icon" href="icon-192.png">
 
   <meta name="theme-color" content="#1f2b1f">
-
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #ffffff;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
-  </style>
 </head>
 
 <body>
 
-  <iframe
-    src="https://script.google.com/macros/s/AKfycbxEqUE2RZ7BQVGJPdcPkMqjuecN9kdfVzl_9OPDxQvdj8Xnk__mLpv9sU0_lAbcAs3bDA/exec"
-    title="Registo de Tiro"
-    allow="clipboard-write">
-  </iframe>
+  <h1>Registo de Tiro</h1>
+
+  <p id="estado">A testar ligação...</p>
+
+  <script>
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbxEqUE2RZ7BQVGJPdcPkMqjuecN9kdfVzl_9OPDxQvdj8Xnk__mLpv9sU0_lAbcAs3bDA/exec';
+
+    fetch(API_URL + '?api=teste')
+      .then(function(resposta) {
+        return resposta.json();
+      })
+      .then(function(dados) {
+        document.getElementById('estado').textContent =
+          dados.mensagem;
+      })
+      .catch(function(erro) {
+        document.getElementById('estado').textContent =
+          'Erro na ligação: ' + erro.message;
+      });
+  </script>
 
 </body>
 </html>
