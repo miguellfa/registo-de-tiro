@@ -1,51 +1,811 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
 
   <title>Registo de Tiro</title>
 
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png">
 
-  <meta name="theme-color" content="#1f2b1f">
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="192x192"
+    href="icon-192.png"
+  >
+
+  <meta
+    name="theme-color"
+    content="#1f2b1f"
+  >
+
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background: #ffffff;
+    }
+
+    h1 {
+      margin-top: 10px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
+
+    input,
+    textarea {
+      padding: 9px;
+      font-size: 16px;
+      box-sizing: border-box;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+
+    /* MENU N.º SÉRIE */
+
+    .combo {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .combo input {
+      width: 100%;
+      padding-right: 45px;
+    }
+
+    .combo-seta {
+      position: absolute;
+      right: 0;
+      top: 0;
+
+      width: 42px;
+      height: 100%;
+
+      border: none;
+
+      background: transparent;
+
+      cursor: pointer;
+    }
+
+    .combo-menu {
+      display: none;
+
+      position: absolute;
+
+      width: 100%;
+      max-height: 200px;
+
+      overflow-y: auto;
+
+      background: white;
+
+      border: 1px solid #aaa;
+
+      z-index: 1000;
+
+      box-sizing: border-box;
+    }
+
+    .combo-opcao {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .combo-opcao:hover {
+      background: #eeeeee;
+    }
+
+  </style>
+
 </head>
+
 
 <body>
 
-  <h1>Registo de Tiro</h1>
-  <p>TESTE JSONP</p>
-  <p id="estado">A aguardar resposta...</p>
+<h1>Registo de Tiro</h1>
 
-  <script>
-    const API_URL =
-      'https://script.google.com/macros/s/AKfycbxEqUE2RZ7BQVGJPdcPkMqjuecN9kdfVzl_9OPDxQvdj8Xnk__mLpv9sU0_lAbcAs3bDA/exec';
 
-    function respostaTeste(dados) {
-      document.getElementById('estado').textContent =
-        dados.mensagem;
+<label>N.º de série da arma (obrigatório)</label>
+
+<div class="combo">
+
+  <input
+    type="text"
+    id="numeroSerie"
+    placeholder="Selecione ou escreva o número de série"
+    oninput="filtrarArmas()"
+    autocomplete="off"
+  >
+
+  <button
+    type="button"
+    class="combo-seta"
+    onclick="abrirListaArmas()"
+  >
+    ▼
+  </button>
+
+  <div
+    id="menuArmas"
+    class="combo-menu">
+  </div>
+
+</div>
+
+
+<label>Tipo de arma</label>
+
+<input
+  type="text"
+  id="tipoArma"
+  list="listaTiposArma"
+  placeholder="Selecione ou escreva o tipo de arma"
+>
+
+<datalist id="listaTiposArma"></datalist>
+
+
+<label>Data da realização do tiro (obrigatório)</label>
+
+<input
+  type="date"
+  id="dataTiro"
+>
+
+
+<label>Tipo de munição</label>
+
+<input
+  type="text"
+  id="tipoMunicao"
+  placeholder="Introduza o tipo de munição"
+>
+
+
+<label>Lote</label>
+
+<input
+  type="text"
+  id="lote"
+  placeholder="Introduza o lote"
+>
+
+
+<label>N.º de tiros (obrigatório)</label>
+
+<input
+  type="number"
+  id="numeroTiros"
+  min="1"
+  placeholder="Introduza o número de tiros"
+>
+
+
+<label>Observações</label>
+
+<textarea
+  id="observacoes"
+  rows="4"
+  placeholder="Introduza observações, se necessário"
+></textarea>
+
+
+<label>Registado por (obrigatório)</label>
+
+<input
+  type="text"
+  id="registadoPor"
+  list="listaUtilizadores"
+  placeholder="Selecione ou escreva o nome"
+>
+
+<datalist id="listaUtilizadores"></datalist>
+
+
+<br><br>
+
+<button
+  type="button"
+  onclick="criarPerfilArma()"
+>
+  Criar perfil de arma nova
+</button>
+
+
+<br><br>
+
+<button
+  type="button"
+  onclick="adicionarNovoRegisto()"
+>
+  Adicionar registo
+</button>
+
+
+<br><br>
+
+<button
+  type="button"
+  onclick="limparFormulario()"
+>
+  Limpar
+</button>
+
+
+
+<script>
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbxEqUE2RZ7BQVGJPdcPkMqjuecN9kdfVzl_9OPDxQvdj8Xnk__mLpv9sU0_lAbcAs3bDA/exec';
+
+
+let listaArmas = [];
+
+
+
+/* ==========================================================
+   FUNÇÃO GENÉRICA PARA COMUNICAR COM O APPS SCRIPT
+========================================================== */
+
+function chamarAPI(acao, parametros, callback) {
+
+  parametros = parametros || {};
+
+  const nomeCallback =
+    'cb_' +
+    Date.now() +
+    '_' +
+    Math.floor(Math.random() * 1000000);
+
+
+  window[nomeCallback] = function(resposta) {
+
+    delete window[nomeCallback];
+
+    script.remove();
+
+    callback(resposta);
+  };
+
+
+  const url = new URL(API_URL);
+
+  url.searchParams.set('api', acao);
+
+  url.searchParams.set(
+    'callback',
+    nomeCallback
+  );
+
+
+  Object.keys(parametros).forEach(function(chave) {
+
+    url.searchParams.set(
+      chave,
+      parametros[chave]
+    );
+
+  });
+
+
+  const script =
+    document.createElement('script');
+
+
+  script.src =
+    url.toString();
+
+
+  script.onerror = function() {
+
+    delete window[nomeCallback];
+
+    script.remove();
+
+    alert(
+      'Não foi possível comunicar com a base de dados.'
+    );
+  };
+
+
+  document.body.appendChild(script);
+}
+
+
+
+/* ==========================================================
+   CARREGAR ARMAS
+========================================================== */
+
+function carregarArmas() {
+
+  chamarAPI(
+    'obterArmas',
+    {},
+    function(resposta) {
+
+      if (!resposta.sucesso) {
+        alert(resposta.mensagem);
+        return;
+      }
+
+      listaArmas =
+        resposta.dados || [];
+
+      mostrarArmas(listaArmas);
+
     }
+  );
+}
 
-    // Também aceitamos "callback", caso o Apps Script use o nome por defeito.
-    function callback(dados) {
-      respostaTeste(dados);
-    }
 
-    const chamada = document.createElement('script');
 
-    chamada.src =
-      API_URL +
-      '?api=teste&callback=respostaTeste&t=' +
-      Date.now();
+function mostrarArmas(armas) {
 
-    chamada.onerror = function() {
-      document.getElementById('estado').textContent =
-        'Não foi possível carregar a resposta do Apps Script.';
+  const menu =
+    document.getElementById('menuArmas');
+
+  menu.innerHTML = '';
+
+
+  armas.forEach(function(arma) {
+
+    const opcao =
+      document.createElement('div');
+
+    opcao.className =
+      'combo-opcao';
+
+    opcao.textContent =
+      arma.numeroSerie;
+
+
+    opcao.onclick = function() {
+
+      document
+        .getElementById('numeroSerie')
+        .value =
+        arma.numeroSerie;
+
+      menu.style.display =
+        'none';
+
+      preencherTipoArma();
+
     };
 
-    document.body.appendChild(chamada);
-  </script>
+
+    menu.appendChild(opcao);
+
+  });
+}
+
+
+
+function abrirListaArmas() {
+
+  const menu =
+    document.getElementById('menuArmas');
+
+
+  if (menu.style.display === 'block') {
+
+    menu.style.display = 'none';
+
+  } else {
+
+    mostrarArmas(listaArmas);
+
+    menu.style.display = 'block';
+
+  }
+}
+
+
+
+function filtrarArmas() {
+
+  const texto =
+    document
+      .getElementById('numeroSerie')
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  const filtradas =
+    listaArmas.filter(function(arma) {
+
+      return String(
+        arma.numeroSerie
+      )
+      .toUpperCase()
+      .includes(texto);
+
+    });
+
+
+  mostrarArmas(filtradas);
+
+  document
+    .getElementById('menuArmas')
+    .style.display =
+    'block';
+
+  preencherTipoArma();
+
+}
+
+
+
+function preencherTipoArma() {
+
+  const numeroSerie =
+    document
+      .getElementById('numeroSerie')
+      .value
+      .trim();
+
+
+  const campoTipo =
+    document
+      .getElementById('tipoArma');
+
+
+  const armaEncontrada =
+    listaArmas.find(
+      function(arma) {
+
+        return String(
+          arma.numeroSerie
+        ).toUpperCase()
+        ===
+        numeroSerie.toUpperCase();
+
+      }
+    );
+
+
+  if (armaEncontrada) {
+
+    campoTipo.value =
+      armaEncontrada.tipoArma;
+
+    campoTipo.disabled =
+      true;
+
+  } else {
+
+    campoTipo.disabled =
+      false;
+
+    campoTipo.value =
+      '';
+
+  }
+
+}
+
+
+
+/* ==========================================================
+   TIPOS DE ARMA
+========================================================== */
+
+function carregarTiposArma() {
+
+  chamarAPI(
+    'obterTiposArma',
+    {},
+    function(resposta) {
+
+      const lista =
+        document.getElementById(
+          'listaTiposArma'
+        );
+
+      lista.innerHTML = '';
+
+
+      if (!resposta.sucesso) {
+        return;
+      }
+
+
+      resposta.dados.forEach(
+        function(tipo) {
+
+          const option =
+            document.createElement(
+              'option'
+            );
+
+          option.value = tipo;
+
+          lista.appendChild(
+            option
+          );
+
+        }
+      );
+
+    }
+  );
+}
+
+
+
+/* ==========================================================
+   UTILIZADORES
+========================================================== */
+
+function carregarUtilizadores() {
+
+  chamarAPI(
+    'obterUtilizadores',
+    {},
+    function(resposta) {
+
+      const lista =
+        document.getElementById(
+          'listaUtilizadores'
+        );
+
+      lista.innerHTML = '';
+
+
+      if (!resposta.sucesso) {
+        return;
+      }
+
+
+      resposta.dados.forEach(
+        function(nome) {
+
+          const option =
+            document.createElement(
+              'option'
+            );
+
+          option.value = nome;
+
+          lista.appendChild(
+            option
+          );
+
+        }
+      );
+
+    }
+  );
+}
+
+
+
+/* ==========================================================
+   CRIAR ARMA
+========================================================== */
+
+function criarPerfilArma() {
+
+  const numeroSerie =
+    document
+      .getElementById('numeroSerie')
+      .value;
+
+  const tipoArma =
+    document
+      .getElementById('tipoArma')
+      .value;
+
+
+  chamarAPI(
+    'criarArma',
+    {
+      numeroSerie:
+        numeroSerie,
+
+      tipoArma:
+        tipoArma
+    },
+
+    function(resposta) {
+
+      alert(
+        resposta.mensagem
+      );
+
+
+      if (resposta.sucesso) {
+
+        carregarArmas();
+
+        carregarTiposArma();
+
+      }
+
+    }
+  );
+
+}
+
+
+
+/* ==========================================================
+   ADICIONAR REGISTO
+========================================================== */
+
+function adicionarNovoRegisto() {
+
+  const dados = {
+
+    numeroSerie:
+      document
+        .getElementById('numeroSerie')
+        .value,
+
+    dataTiro:
+      document
+        .getElementById('dataTiro')
+        .value,
+
+    tipoMunicao:
+      document
+        .getElementById('tipoMunicao')
+        .value,
+
+    lote:
+      document
+        .getElementById('lote')
+        .value,
+
+    numeroTiros:
+      document
+        .getElementById('numeroTiros')
+        .value,
+
+    observacoes:
+      document
+        .getElementById('observacoes')
+        .value,
+
+    registadoPor:
+      document
+        .getElementById('registadoPor')
+        .value
+
+  };
+
+
+  chamarAPI(
+    'adicionarRegisto',
+    dados,
+
+    function(resposta) {
+
+      alert(
+        resposta.mensagem +
+        (
+          resposta.sucesso
+          ?
+          '\nTotal acumulado: ' +
+          resposta.totalTiros
+          :
+          ''
+        )
+      );
+
+
+      if (resposta.sucesso) {
+
+        carregarUtilizadores();
+
+        limparFormulario();
+
+      }
+
+    }
+  );
+
+}
+
+
+
+/* ==========================================================
+   LIMPAR
+========================================================== */
+
+function limparFormulario() {
+
+  document
+    .getElementById('numeroSerie')
+    .value = '';
+
+  document
+    .getElementById('tipoArma')
+    .value = '';
+
+  document
+    .getElementById('tipoArma')
+    .disabled = false;
+
+  document
+    .getElementById('dataTiro')
+    .value = '';
+
+  document
+    .getElementById('tipoMunicao')
+    .value = '';
+
+  document
+    .getElementById('lote')
+    .value = '';
+
+  document
+    .getElementById('numeroTiros')
+    .value = '';
+
+  document
+    .getElementById('observacoes')
+    .value = '';
+
+  document
+    .getElementById('registadoPor')
+    .value = '';
+
+  document
+    .getElementById('menuArmas')
+    .style.display =
+    'none';
+
+}
+
+
+
+/* ==========================================================
+   ARRANQUE DA APP
+========================================================== */
+
+window.onload = function() {
+
+  carregarArmas();
+
+  carregarTiposArma();
+
+  carregarUtilizadores();
+
+};
+
+</script>
+
 
 </body>
+
 </html>
