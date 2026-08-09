@@ -2,11 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Registo de Tiro</title>
 
@@ -19,8 +15,8 @@
 <body>
 
   <h1>Registo de Tiro</h1>
-
-  <p id="estado">A testar ligação...</p>
+  <p>TESTE JSONP</p>
+  <p id="estado">A aguardar resposta...</p>
 
   <script>
     const API_URL =
@@ -31,18 +27,24 @@
         dados.mensagem;
     }
 
-    const scriptAPI = document.createElement('script');
+    // Também aceitamos "callback", caso o Apps Script use o nome por defeito.
+    function callback(dados) {
+      respostaTeste(dados);
+    }
 
-    scriptAPI.src =
+    const chamada = document.createElement('script');
+
+    chamada.src =
       API_URL +
-      '?api=teste&callback=respostaTeste';
+      '?api=teste&callback=respostaTeste&t=' +
+      Date.now();
 
-    scriptAPI.onerror = function() {
+    chamada.onerror = function() {
       document.getElementById('estado').textContent =
-        'Erro na ligação à API.';
+        'Não foi possível carregar a resposta do Apps Script.';
     };
 
-    document.body.appendChild(scriptAPI);
+    document.body.appendChild(chamada);
   </script>
 
 </body>
