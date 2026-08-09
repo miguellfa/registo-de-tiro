@@ -26,29 +26,24 @@
     const API_URL =
       'https://script.google.com/macros/s/AKfycbxEqUE2RZ7BQVGJPdcPkMqjuecN9kdfVzl_9OPDxQvdj8Xnk__mLpv9sU0_lAbcAs3bDA/exec';
 
-   <script>
-  const API_URL =
-    'https://script.google.com/macros/s/AKfycbxEqUE2RZ7BQVGJPdcPkMqjuecN9kdfVzl_9OPDxQvdj8Xnk__mLpv9sU0_lAbcAs3bDA/exec';
+    function respostaTeste(dados) {
+      document.getElementById('estado').textContent =
+        dados.mensagem;
+    }
 
-  function respostaTeste(dados) {
-    document.getElementById('estado').textContent =
-      dados.mensagem;
-  }
+    const scriptAPI = document.createElement('script');
 
-  const script = document.createElement('script');
+    scriptAPI.src =
+      API_URL +
+      '?api=teste&callback=respostaTeste';
 
-  script.src =
-    API_URL +
-    '?api=teste&callback=respostaTeste';
+    scriptAPI.onerror = function() {
+      document.getElementById('estado').textContent =
+        'Erro na ligação à API.';
+    };
 
-  script.onerror = function() {
-    document.getElementById('estado').textContent =
-      'Erro na ligação à API.';
-  };
+    document.body.appendChild(scriptAPI);
+  </script>
 
-  document.body.appendChild(script);
-</script>
-<h1>Registo de Tiro</h1>
-<p id="estado">A testar ligação...</p>
 </body>
 </html>
