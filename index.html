@@ -5,7 +5,7 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
   <title>Registo de Tiro</title>
@@ -19,17 +19,35 @@
     href="icon-192.png"
   >
 
-  <meta
-    name="theme-color"
-    content="#1f2b1f"
-  >
+  <meta name="theme-color" content="#1f2b1f">
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+  </style>
 </head>
 
 <body>
 
-  <h1>Registo de Tiro</h1>
-
-  <p>PWA em configuração.</p>
+  <iframe
+    src="https://script.google.com/macros/s/AKfycbxEqUE2RZ7BQVGJPdcPkMqjuecN9kdfVzl_9OPDxQvdj8Xnk__mLpv9sU0_lAbcAs3bDA/exec"
+    title="Registo de Tiro"
+    allow="clipboard-write">
+  </iframe>
 
 </body>
 </html>
